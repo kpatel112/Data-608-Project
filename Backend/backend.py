@@ -11,7 +11,6 @@ import s3fs
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# Initialize Flask app and enable CORS
 app = Flask(__name__)
 CORS(app)
 
@@ -28,7 +27,6 @@ borough_mapping = {
     'QUEENS': 'Q'
 }
 
-# Initialize ThreadPoolExecutor
 executor = ThreadPoolExecutor(max_workers=8)
 
 def load_data(year):
@@ -65,17 +63,16 @@ def filter_data_endpoint():
     genders = req.get('genders', [])
     age_categories = req.get('age_categories', [])
 
-    # Convert borough names to codes
+    # convert borough names to codes
     borough_codes = [borough_mapping.get(borough, borough) for borough in boroughs]
 
-    # Load data for the specified years in parallel
+    # Will load data for the specified years in parallel
     futures = [executor.submit(load_data, year) for year in years]
     data_frames = [future.result() for future in as_completed(futures)]
     data = dd.concat(data_frames)
 
     print(f"Columns after concatenation: {data.columns}")
 
-    # Filter the data
     try:
         filtered_data = filter_data(data, borough_codes, offenses, ethnicities, genders, age_categories).compute()
         return jsonify(filtered_data[['ARREST_DATE','ARREST_BORO', 'OFNS_DESC', 'PERP_RACE', 'PERP_SEX', 'AGE_GROUP', 'Latitude', 'Longitude']].to_dict(orient='records'))

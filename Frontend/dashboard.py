@@ -17,10 +17,8 @@ import concurrent.futures
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Initialize Dash app
 app = dash.Dash(__name__)
 
-# Define the layout of the app
 app.layout = html.Div([
     html.H1("New York Crime Data Dashboard"),
     dcc.Dropdown(
@@ -86,7 +84,7 @@ app.layout = html.Div([
     html.Div(id='output-container')
 ])
 
-# Define the borough mapping dictionary
+# borough mapping dictionary
 borough_mapping = {
     'MANHATTAN': 'M',
     'BRONX': 'B',
@@ -95,7 +93,7 @@ borough_mapping = {
     'STATEN ISLAND': 'S'
 }
 
-# Define the function to fetch data
+# function to fetch data
 def fetch_data(params):
     try:
         response = requests.post("http://backend:5000/filter", json=params)
@@ -106,7 +104,7 @@ def fetch_data(params):
         logger.error(f"Error occurred: {e}")
         return pd.DataFrame()
 
-# Define the function to aggregate data
+# function to aggregate data
 def aggregate_data(data, selected_years):
     if 'ARREST_DATE' in data.columns:
         data['ARREST_DATE'] = pd.to_datetime(data['ARREST_DATE'])
@@ -177,10 +175,8 @@ def update_output(n_clicks, selected_years, selected_boroughs, selected_offenses
             future_data = executor.submit(fetch_data, params)
             data = future_data.result()
 
-        # Aggregate data for plotting
         data_aggregated = aggregate_data(data, selected_years)
 
-        # Define colors for boroughs
         borough_colors = {
             'MANHATTAN': 'blue',
             'BRONX': 'red',
@@ -226,7 +222,7 @@ def update_output(n_clicks, selected_years, selected_boroughs, selected_offenses
             legend_title="Borough"
         )
 
-        # Map Plot remains unchanged
+        # Map Plot
         if 'Latitude' in data.columns and 'Longitude' in data.columns and 'ARREST_BORO' in data.columns:
             map_data = data[['Latitude', 'Longitude', 'ARREST_BORO']].dropna()
             map_fig = px.scatter_mapbox(

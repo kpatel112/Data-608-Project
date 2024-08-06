@@ -1,5 +1,0 @@
-dash
-jupyter-dash
-pandas
-plotly
-boto3
